@@ -26,21 +26,27 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(409,"User Already Existed")
     }
     
-    
+    console.log(req.files); // Log the files to see the structure
+
      
     const avatarlocalpath = req.files?.avatar[0]?.path;
-const CoverImagesLocalPath = req.files?.coverImage[0]?.path;
+    console.log( avatarlocalpath)
+    let coverImageLocalpath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalpath = req.files.coverImage[0].path
+    }
+  
 
 if (!avatarlocalpath) {
     throw new ApiError(400, "Avatar file is required");
 }
 
-if (!CoverImagesLocalPath) {
-    throw new ApiError(400, "Cover image file is required");
-}
 
 const avatar = await uploadOnCloudinary(avatarlocalpath);
-const coverImage = await uploadOnCloudinary(CoverImagesLocalPath);
+const coverImage = await uploadOnCloudinary(coverImageLocalpath);
+
+console.log(avatar);
+
 
     if(!avatar){
         throw new ApiError(400, "Avatar file is required");
@@ -49,7 +55,7 @@ const coverImage = await uploadOnCloudinary(CoverImagesLocalPath);
   const user =  await User.create({
         fullName,
         avatar:avatar.url,
-        coverImage: coverImage.url || "",
+        coverImage: coverImage?.url || "",
         email,
         password,
         username: username.toLowerCase()
